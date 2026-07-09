@@ -56,6 +56,17 @@ export async function deleteApplication(id) {
   return res.json();
 }
 
+export async function uploadResume(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(`${BASE_URL}/upload-resume`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: formData,
+  });
+  return res.json();
+}
+
 export async function analyzeFit(id, resumeText) {
   const res = await fetch(`${BASE_URL}/applications/${id}/analyze`, {
     method: 'POST',

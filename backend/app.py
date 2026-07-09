@@ -1,5 +1,6 @@
 import os
 import json
+import io
 from datetime import datetime, timedelta
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -9,6 +10,7 @@ from functools import wraps
 from dotenv import load_dotenv
 from models import db, User, Application
 import google.generativeai as genai
+from PyPDF2 import PdfReader
 
 load_dotenv()
 
@@ -145,6 +147,37 @@ def delete_application(current_user, app_id):
     db.session.delete(application)
     db.session.commit()
     return jsonify({'message': 'Deleted'}), 200
+
+
+@app.route('/api/upload-resume', methods=['POST'])
+@token_required
+def upload_resume(current_user):
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+
+    if not file.filename.lower().endswith('.pdf'):
+        return jsonify({'error': 'Only PDF files are supported'}), 400
+
+    try:
+        pdf_bytes = file.read()
+        reader = PdfReader(io.BytesIO(pdf_bytes))
+        text = ''
+        for page in reader.pages:
+            extracted = page.extract_text()
+            if extracted:
+                text += extracted + '\n'
+
+        if not text.strip():
+            return jsonify({'error': 'Could not extract text — the PDF may be scanned/image-based'}), 400
+
+        return jsonify({'resume_text': text.strip()}), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Failed to read PDF: {str(e)}'}), 500
 
 
 # ---------- AI fit analysis route ----------

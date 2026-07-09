@@ -114,6 +114,7 @@ function Dashboard({ user, resumeText, setResumeText, onLogout }) {
   const [showResumeBox, setShowResumeBox] = useState(!resumeText);
   const [form, setForm] = useState({ company_name: '', role: '', job_description: '', status: 'Applied' });
   const [analyzing, setAnalyzing] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   async function loadApplications() {
     const data = await api.getApplications();
@@ -163,18 +164,42 @@ function Dashboard({ user, resumeText, setResumeText, onLogout }) {
 
       <section style={styles.resumeSection}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <strong>Your Resume Text</strong>
+          <strong>Your Resume</strong>
           <button style={styles.linkBtn} onClick={() => setShowResumeBox(!showResumeBox)}>
             {showResumeBox ? 'Hide' : 'Edit'}
           </button>
         </div>
         {showResumeBox && (
-          <textarea
-            style={styles.textarea}
-            placeholder="Paste your resume text here once — it's reused for every AI fit analysis."
-            value={resumeText}
-            onChange={(e) => setResumeText(e.target.value)}
-          />
+          <div>
+            <div style={{ margin: '10px 0' }}>
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  setUploading(true);
+                  const res = await api.uploadResume(file);
+                  setUploading(false);
+                  if (res.resume_text) {
+                    setResumeText(res.resume_text);
+                  } else {
+                    alert(res.error || 'Upload failed');
+                  }
+                }}
+              />
+              {uploading && <span style={{ marginLeft: 10, color: '#666' }}>Extracting text...</span>}
+            </div>
+            <p style={{ fontSize: 13, color: '#888', margin: '4px 0' }}>
+              Upload a PDF, or paste text directly below:
+            </p>
+            <textarea
+              style={styles.textarea}
+              placeholder="Or paste your resume text here"
+              value={resumeText}
+              onChange={(e) => setResumeText(e.target.value)}
+            />
+          </div>
         )}
       </section>
 
