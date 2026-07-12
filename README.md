@@ -1,93 +1,97 @@
-# JobFit Tracker
+# JobFit AI 🎯
 
-An AI-powered job application tracker. Paste your resume once, add job descriptions
-for companies you're applying to, and get an instant AI-generated fit score, skill
-gap analysis, and suggestion for which project to highlight — powered by the Claude API.
+**AI-powered job application tracker with automatic resume-to-JD fit scoring.**
 
-Built while applying to companies through Zenken, to solve a real problem: quickly
-comparing my own resume against each job description instead of doing it manually.
+Built while applying to companies through Zenken — instead of manually comparing my
+resume against every job description, I built a tool that does it in seconds using AI.
 
-## Tech Stack
-- **Frontend:** React (Vite)
-- **Backend:** Flask (Python)
-- **Database:** SQLite (swap to MySQL/PostgreSQL by changing `DATABASE_URL`)
-- **AI:** Google Gemini API (free tier — no credit card needed)
-- **Auth:** JWT
+---
 
-## Features
-- Sign up / log in (JWT authentication)
-- Add, edit, delete job applications with status tracking (Applied / Interview / Offer / Rejected)
-- Paste resume once, reuse it for every analysis
-- AI fit score (0–100%) with matching skills, missing skills, and a one-line
-  recommendation on which of your projects to highlight for that specific role
+## 🚀 Features
 
-## Project Structure
+- 🔐 **Secure authentication** — JWT-based signup/login with hashed passwords
+- 📄 **PDF resume upload** — automatically extracts text from your resume (or paste manually)
+- 📋 **Application tracking** — add companies, roles, job descriptions; track status (Applied → Interview → Offer/Rejected)
+- 🤖 **AI Fit Analysis** — one click sends your resume + the job description to Google's Gemini API and returns:
+  - Fit score (0–100%)
+  - Matching skills
+  - Missing skills / gaps
+  - Which of your projects to highlight for that specific role
+- 💾 Fit results persist per application — no need to re-analyze on refresh
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React (Vite) |
+| Backend | Flask (Python) |
+| Database | SQLite (SQLAlchemy ORM) |
+| Auth | JWT (PyJWT) |
+| AI | Google Gemini API |
+| PDF Parsing | PyPDF2 |
+
+## 📸 Screenshots
+
+> _Add screenshots here after running the app: signup page, dashboard, and the AI fit-score result card._
+
+## 🏗️ Architecture
+
 ```
-job-tracker/
-├── backend/
-│   ├── app.py            # Flask app, routes
-│   ├── models.py         # SQLAlchemy models (User, Application)
-│   ├── requirements.txt
-│   └── .env.example
-└── frontend/
-    ├── src/
-    │   ├── App.jsx        # Main UI
-    │   ├── api.js         # Backend API calls
-    │   └── main.jsx
-    └── package.json
+User uploads resume (PDF)
+        ↓
+Flask extracts text (PyPDF2)
+        ↓
+User adds Job Description → stored in SQLite
+        ↓
+Click "Analyze Fit"
+        ↓
+Flask sends resume + JD to Gemini API (structured JSON prompt)
+        ↓
+Response parsed & stored → displayed as fit score, gaps, and recommendation
 ```
 
-## Setup (Windows / VS Code)
+## ⚙️ Setup
 
 ### 1. Backend
-```powershell
+```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate
+venv\Scripts\activate        # Windows
 pip install -r requirements.txt
 ```
 
-Create a `.env` file in `backend/` (copy `.env.example`) and add your free Gemini API key
-(get one at aistudio.google.com — no credit card needed):
+Create a `.env` file in `backend/` (see `.env.example`):
 ```
-GEMINI_API_KEY=your-real-key-here
-SECRET_KEY=some-random-string
+GEMINI_API_KEY=your-free-key-from-aistudio.google.com
+SECRET_KEY=any-random-string
 DATABASE_URL=sqlite:///job_tracker.db
 ```
 
-Run the backend:
-```powershell
+Run it:
+```bash
 python app.py
 ```
-It should start on `http://127.0.0.1:5000`.
+Backend runs on `http://127.0.0.1:5000`
 
 ### 2. Frontend
-Open a **new** terminal:
-```powershell
+```bash
 cd frontend
 npm install
 npm run dev
 ```
-Open `http://localhost:5173` in your browser.
+Open `http://localhost:5173`
 
-> Note: if `npm` is blocked by PowerShell's execution policy (like you saw with
-> MedTrack), run this once as Administrator:
-> ```powershell
-> Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-> ```
+## 🔒 Security Notes
+- Passwords are hashed with Werkzeug, never stored in plain text
+- API keys are loaded from environment variables, never hardcoded
+- Every application route verifies the requesting user owns that resource
+- `.gitignore` excludes `.env`, `venv/`, `node_modules/`, and local database files
 
-## How it works (for interview explanation)
-1. User signs up/logs in → Flask issues a JWT token, stored in the browser
-2. User pastes a job description and saves it as an "Application" (stored in SQLite via SQLAlchemy)
-3. User pastes resume text once (kept in browser localStorage, reused each time)
-4. Clicking "Analyze Fit" sends both texts to the backend, which calls the Gemini API
-   with a structured prompt asking for a JSON response (fit score, matching skills,
-   gaps, project suggestion)
-5. The backend parses the JSON and stores it against that application, so the score
-   persists on refresh
+## 🔮 Future Improvements
+- Deploy backend to AWS (EC2), frontend to Vercel/Netlify
+- Switch SQLite → PostgreSQL for production
+- OCR support for scanned/image-based PDF resumes
+- Email reminders for interview dates (AWS SNS)
 
-## Possible improvements to mention in interviews
-- Deploy backend to AWS EC2/Elastic Beanstalk, frontend to S3 + CloudFront
-- Move resume storage to AWS S3 instead of localStorage
-- Add file upload (PDF resume parsing) instead of pasting text
-- Add email reminders for interview dates using AWS SNS (like MedTrack)
+## 👤 Author
+**Prakash** — [github.com/coder-PRAKASH](https://github.com/coder-PRAKASH)
