@@ -30,9 +30,7 @@ resume against every job description, I built a tool that does it in seconds usi
 | AI | Google Gemini API |
 | PDF Parsing | PyPDF2 |
 
-## 📸 Screenshots
 
-> _Add screenshots here after running the app: signup page, dashboard, and the AI fit-score result card._
 
 ## 🏗️ Architecture
 
